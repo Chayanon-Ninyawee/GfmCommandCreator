@@ -64,15 +64,16 @@ public class GfmCommandCreator {
 
 			for (GfmSubCommand gfmSubCommand : this.gfmCommand.getGfmSubCommands()) {
 				if (args[0].equalsIgnoreCase(gfmSubCommand.getName())) {
+					String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
 					if (gfmSubCommand.isPermissionNull()) {
-						if (!gfmSubCommand.getGfmCommandHandler().execute(sender, args)) {
+						if (!gfmSubCommand.getGfmCommandHandler().execute(sender, subArgs)) {
 							sender.sendMessage(gfmSubCommand.getUsage());
 						}
 						return true;
 					}
 
 					if (sender.hasPermission(gfmSubCommand.getPermission())) {
-						if (!gfmSubCommand.getGfmCommandHandler().execute(sender, args)) {
+						if (!gfmSubCommand.getGfmCommandHandler().execute(sender, subArgs)) {
 							sender.sendMessage(gfmSubCommand.getUsage());
 						}
 						return true;
