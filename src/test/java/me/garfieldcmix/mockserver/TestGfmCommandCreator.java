@@ -11,8 +11,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestGfmCommandCreator {
 	private ServerMock server;
@@ -46,64 +47,162 @@ public class TestGfmCommandCreator {
 	}
 
 	@Test
-	public void testHeadCommandUsage() {
+	public void testCommandUsage() {
 		Command command = plugin.getCommand("gfmusage");
 		assert command != null;
+
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
 
 		command.execute(playerNoPermission, command.getName(), new String[]{});
 		playerNoPermission.assertSaid("Usage works!");
 
 		command.execute(playerHasPermission, command.getName(), new String[]{});
 		playerHasPermission.assertSaid("Usage works!");
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			command.execute(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerNoPermission.assertSaid("Usage works!");
+
+			command.execute(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerHasPermission.assertSaid("Usage works!");
+		}
 	}
 
 	@Test
-	public void testHeadCommandDefaultUsage() {
+	public void testCommandDefaultUsage() {
 		Command command = plugin.getCommand("gfmdefaultusage");
 		assert command != null;
+
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
 
 		command.execute(playerNoPermission, command.getName(), new String[]{});
 		playerNoPermission.assertSaid(ChatColor.translateAlternateColorCodes('&', "&cInvalid command!"));
 
 		command.execute(playerHasPermission, command.getName(), new String[]{});
 		playerHasPermission.assertSaid(ChatColor.translateAlternateColorCodes('&', "&cInvalid command!"));
+
+		for (String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			command.execute(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerNoPermission.assertSaid(ChatColor.translateAlternateColorCodes('&', "&cInvalid command!"));
+
+			command.execute(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerHasPermission.assertSaid(ChatColor.translateAlternateColorCodes('&', "&cInvalid command!"));
+		}
 	}
 
 	@Test
-	public void testHeadCommandHandler() {
+	public void testCommandHandler() {
 		Command command = plugin.getCommand("gfmhandler");
 		assert command != null;
 
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
+
 		command.execute(playerNoPermission, command.getName(), new String[]{});
 		playerNoPermission.assertSaid("Handler works!");
+		playerNoPermission.nextMessage();
 
 		command.execute(playerHasPermission, command.getName(), new String[]{});
 		playerHasPermission.assertSaid("Handler works!");
+		playerHasPermission.nextMessage();
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			command.execute(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerNoPermission.assertSaid("Handler works!");
+			playerNoPermission.nextMessage();
+
+			command.execute(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerHasPermission.assertSaid("Handler works!");
+			playerHasPermission.nextMessage();
+		}
 	}
 
 	@Test
-	public void testHeadCommandPermission() {
+	public void testCommandPermission() {
 		Command command = plugin.getCommand("gfmpermission");
 		assert command != null;
 
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
+
 		command.execute(playerNoPermission, command.getName(), new String[]{});
 		playerNoPermission.assertSaid("No permission naja");
+		playerNoPermission.nextMessage();
 
-		command.execute(playerHasPermission, command.getName(), new String[]{});
+		command.execute(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0]));
 		playerHasPermission.assertSaid("If you have permission, it works! But if you don't, ...why?");
+		playerHasPermission.nextMessage();
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			command.execute(playerNoPermission, command.getName(), new String[]{});
+			playerNoPermission.assertSaid("No permission naja");
+			playerNoPermission.nextMessage();
+
+			command.execute(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerHasPermission.assertSaid("If you have permission, it works! But if you don't, ...why?");
+			playerHasPermission.nextMessage();
+		}
 	}
 
 	@Test
-	public void testHeadCommandDefaultPermission() {
+	public void testCommandDefaultPermission() {
 		Command command = plugin.getCommand("gfmdefaultpermission");
 		assert command != null;
 
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
+
 		command.execute(playerNoPermission, command.getName(), new String[]{});
 		playerNoPermission.assertSaid(ChatColor.translateAlternateColorCodes('&', "&cYou don't have permission to use this command!"));
+		playerNoPermission.nextMessage();
 
 		command.execute(playerHasPermission, command.getName(), new String[]{});
 		playerHasPermission.assertSaid("If you have permission, it works! But if you don't, ...why?");
+		playerHasPermission.nextMessage();
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			command.execute(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerNoPermission.assertSaid(ChatColor.translateAlternateColorCodes('&', "&cYou don't have permission to use this command!"));
+			playerNoPermission.nextMessage();
+
+			command.execute(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0]));
+			playerHasPermission.assertSaid("If you have permission, it works! But if you don't, ...why?");
+			playerHasPermission.nextMessage();
+		}
 	}
 
-	// TODO: Do the test for subCommand first/second/third iteration.
+	@Test
+	public void testTabComplete() {
+		Command command = plugin.getCommand("gfmtabcomplete");
+		assert command != null;
+
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
+
+		assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerNoPermission, command.getName(), new String[]{}));
+		assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerHasPermission, command.getName(), new String[]{}));
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+			assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+		}
+	}
+
+	// TODO: Test TabComplete
+
+
 }

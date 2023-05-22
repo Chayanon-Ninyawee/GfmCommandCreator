@@ -8,6 +8,8 @@ commands:
   gfmhandler:
   gfmpermission:
   gfmdefaultpermission:
+  gfmtabcomplete:
+  gfmdefaulttabcomplete:
 
 permissions:
   gfmtest:

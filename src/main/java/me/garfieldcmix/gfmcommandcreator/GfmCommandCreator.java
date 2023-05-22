@@ -10,8 +10,8 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.List;
+import javax.annotation.Nonnull;
+import java.util.*;
 
 public class GfmCommandCreator {
 	public static void register(JavaPlugin plugin, List<GfmHeadCommand> commands) {
@@ -117,8 +117,46 @@ public class GfmCommandCreator {
 
 		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+			if (args.length == 0) {
+				if (this.gfmHeadCommand.isTabComplete()) {
+					return new ArrayList<>(this.gfmHeadCommand.getTabCompleteArgs().get(0));
+				} else if (this.gfmHeadCommand.isTabCompletePlayer()) {
+					return null;
+				} else {
+					return Collections.emptyList();
+				}
+			}
 
-			return null;
+			boolean isThereNextSubCommand = true;
+			boolean isThereAnyCorrectSubCommand = true;
+			GfmCommand lastSubCommand = this.gfmHeadCommand;
+			String[] lastSubArgs = args;
+
+			while(isThereNextSubCommand && isThereAnyCorrectSubCommand) {
+				isThereAnyCorrectSubCommand = false;
+
+				for (GfmSubCommand gfmSubCommand : lastSubCommand.getGfmSubCommands()) {
+					if (!lastSubArgs[0].equalsIgnoreCase(gfmSubCommand.getName())) continue;
+
+					String[] subArgs = Arrays.copyOfRange(lastSubArgs, 1, lastSubArgs.length);
+
+					if (subArgs.length == 0) {
+						if (gfmSubCommand.isTabComplete()) {
+							return new ArrayList<>(gfmSubCommand.getTabCompleteArgs().get(0));
+						} else if (gfmSubCommand.isTabCompletePlayer()) {
+							return null;
+						} else {
+							return Collections.emptyList();
+						}
+					}
+
+					isThereNextSubCommand = !gfmSubCommand.getGfmSubCommands().isEmpty();
+					isThereAnyCorrectSubCommand = true;
+					lastSubCommand = gfmSubCommand;
+					lastSubArgs = subArgs;
+				}
+			}
+			return Collections.emptyList();
 		}
 	}
 }

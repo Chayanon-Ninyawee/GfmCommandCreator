@@ -12,7 +12,8 @@ public abstract class GfmCommand {
 	@Getter private final String name;
 	@Getter private final String usage;
 	@Getter private final boolean isTabComplete;
-	@Getter private final List<Set<String>> tabCompleteArgs;
+	@Getter private final boolean isTabCompletePlayer;
+	@Getter private final List<List<String>> tabCompleteArgs;
 	@Getter	private final Permission permission;
 	@Getter	private final String noPermissionMessage;
 	@Getter	private final GfmCommandHandler gfmCommandHandler;
@@ -23,6 +24,7 @@ public abstract class GfmCommand {
 		this.name 								= builder.name;
 		this.usage 								= builder.usage;
 		this.isTabComplete						= builder.isTabComplete;
+		this.isTabCompletePlayer				= builder.isTabCompletePlayer;
 		this.tabCompleteArgs 					= builder.tabCompleteArgs;
 		this.permission							= builder.permission;
 		this.noPermissionMessage				= builder.noPermissionMessage;
@@ -35,7 +37,8 @@ public abstract class GfmCommand {
 		String name;
 		String usage 							= ChatColor.translateAlternateColorCodes('&', "&cInvalid command!");
 		boolean isTabComplete 					= true;
-		List<Set<String>> tabCompleteArgs 		= new ArrayList<>();
+		boolean isTabCompletePlayer				= false;
+		List<List<String>> tabCompleteArgs 		= new ArrayList<>();
 		Permission permission;
 		String noPermissionMessage 				= ChatColor.translateAlternateColorCodes('&', "&cYou don't have permission to use this command!");
 		GfmCommandHandler gfmCommandHandler;
@@ -64,7 +67,7 @@ public abstract class GfmCommand {
 		 * Set all tabCompletes for this GfmSubCommand.
 		 * @param tabCompleteArgs All tabCompletes that you want sender to see when tab.
 		 */
-		public builder setTabCompleteArgs(final List<Set<String>> tabCompleteArgs) {
+		public builder setTabCompleteArgs(final List<List<String>> tabCompleteArgs) {
 			this.tabCompleteArgs = tabCompleteArgs;
 			return this;
 		}
@@ -73,7 +76,7 @@ public abstract class GfmCommand {
 		 * Add one tabComplete to this GfmSubCommand. If add another tabComplete, it will be for next arg.
 		 * @param tabCompleteArg one tabComplete that you want sender to see when tab.
 		 */
-		public builder addTabCompleteArg(final Set<String> tabCompleteArg) {
+		public builder addTabCompleteArg(final List<String> tabCompleteArg) {
 			this.tabCompleteArgs.add(tabCompleteArg);
 			return this;
 		}
@@ -83,7 +86,7 @@ public abstract class GfmCommand {
 		 * @param tabCompleteArg one tabComplete that you want sender to see when tab.
 		 */
 		public builder addTabCompleteArg(final String... tabCompleteArg) {
-			this.tabCompleteArgs.add(new HashSet<>(Arrays.asList(tabCompleteArg)));
+			this.tabCompleteArgs.add(new ArrayList<>(Arrays.asList(tabCompleteArg)));
 			return this;
 		}
 
@@ -102,6 +105,15 @@ public abstract class GfmCommand {
 		 */
 		public builder isTabComplete(final boolean isTabComplete) {
 			this.isTabComplete = isTabComplete;
+			return this;
+		}
+
+		/**
+		 * Default: {@code false } <br>
+		 * @param isTabCompletePlayer Show online players in tabComplete.
+		 */
+		public builder isTabCompletePlayer(final boolean isTabCompletePlayer) {
+			this.isTabCompletePlayer = isTabCompletePlayer;
 			return this;
 		}
 
