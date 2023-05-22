@@ -1,0 +1,16 @@
+name: TestPlugin
+version: '${project.version}'
+main: me.garfieldcmix.testplugin.TestPlugin
+api-version: '1.13'
+commands:
+  gfmusage:
+  gfmdefaultusage:
+  gfmhandler:
+  gfmpermission:
+  gfmdefaultpermission:
+
+permissions:
+  gfmtest:
+    commands:
+      gfmpermission:
+        default: op
