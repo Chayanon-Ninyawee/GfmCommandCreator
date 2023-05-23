@@ -243,7 +243,7 @@ public class TestCommand {
 		GfmSubCommand bPermissionSub1A = (GfmSubCommand) new GfmSubCommand.builder()
 				.setName("sub1A")
 				.setUsage("Sub1A command permission test")
-				.isPermissionBlockGfmSubCommands(false)
+				.isPermissionBlockGfmSubCommands(true)
 				.setNoPermissionMessage("Sub1A - No permission")
 				.setGfmCommandHandler((commandSender, strings) -> {
 					commandSender.sendMessage("Sub1A - Has permission");
@@ -254,7 +254,7 @@ public class TestCommand {
 				.setName("sub1D")
 				.setUsage("Sub1D command permission test")
 				.setPermission("testplugin.commands.sub1")
-				.isPermissionBlockGfmSubCommands(false)
+				.isPermissionBlockGfmSubCommands(true)
 				.setNoPermissionMessage("Sub1D - No permission")
 				.setGfmCommandHandler((commandSender, strings) -> {
 					commandSender.sendMessage("Sub1D - Has permission");
@@ -264,7 +264,7 @@ public class TestCommand {
 		GfmSubCommand bPermissionSub2A = (GfmSubCommand) new GfmSubCommand.builder()
 				.setName("sub2A")
 				.setUsage("Sub2A command permission test")
-				.isPermissionBlockGfmSubCommands(false)
+				.isPermissionBlockGfmSubCommands(true)
 				.setNoPermissionMessage("Sub2A - No permission")
 				.setGfmCommandHandler((commandSender, strings) -> {
 					commandSender.sendMessage("Sub2A - Has permission");
@@ -275,7 +275,7 @@ public class TestCommand {
 				.setName("sub2D")
 				.setUsage("Sub2D command permission test")
 				.setPermission("testplugin.commands.sub2")
-				.isPermissionBlockGfmSubCommands(false)
+				.isPermissionBlockGfmSubCommands(true)
 				.setNoPermissionMessage("Sub2D - No permission")
 				.setGfmCommandHandler((commandSender, strings) -> {
 					commandSender.sendMessage("Sub2D - Has permission");
@@ -285,7 +285,7 @@ public class TestCommand {
 		GfmSubCommand bPermissionSub3A = (GfmSubCommand) new GfmSubCommand.builder()
 				.setName("sub3A")
 				.setUsage("Sub3A command permission test")
-				.isPermissionBlockGfmSubCommands(false)
+				.isPermissionBlockGfmSubCommands(true)
 				.setNoPermissionMessage("Sub3A - No permission")
 				.setGfmCommandHandler((commandSender, strings) -> {
 					commandSender.sendMessage("Sub3A - Has permission");
@@ -296,7 +296,7 @@ public class TestCommand {
 				.setName("sub3D")
 				.setUsage("Sub3D command permission test")
 				.setPermission("testplugin.commands.sub3")
-				.isPermissionBlockGfmSubCommands(false)
+				.isPermissionBlockGfmSubCommands(true)
 				.setNoPermissionMessage("Sub3D - No permission")
 				.setGfmCommandHandler((commandSender, strings) -> {
 					commandSender.sendMessage("Sub3D - Has permission");
@@ -304,15 +304,15 @@ public class TestCommand {
 				})
 				.build();
 
-		bPermissionSub2A.addGfmSubCommand(permissionSub3A);
-		permissionSub2A.addGfmSubCommand(permissionSub3D);
-		permissionSub2D.addGfmSubCommand(permissionSub3A);
-		permissionSub2D.addGfmSubCommand(permissionSub3D);
+		bPermissionSub2A.addGfmSubCommand(bPermissionSub3A);
+		bPermissionSub2A.addGfmSubCommand(bPermissionSub3D);
+		bPermissionSub2D.addGfmSubCommand(bPermissionSub3A);
+		bPermissionSub2D.addGfmSubCommand(bPermissionSub3D);
 
-		permissionSub1A.addGfmSubCommand(permissionSub2A);
-		permissionSub1A.addGfmSubCommand(permissionSub2D);
-		permissionSub1D.addGfmSubCommand(permissionSub2A);
-		permissionSub1D.addGfmSubCommand(permissionSub2D);
+		bPermissionSub1A.addGfmSubCommand(bPermissionSub2A);
+		bPermissionSub1A.addGfmSubCommand(bPermissionSub2D);
+		bPermissionSub1D.addGfmSubCommand(bPermissionSub2A);
+		bPermissionSub1D.addGfmSubCommand(bPermissionSub2D);
 
 		commands.add(
 				(GfmHeadCommand) new GfmHeadCommand.builder()
@@ -324,8 +324,8 @@ public class TestCommand {
 							commandSender.sendMessage("HeadA - Has permission");
 							return false;
 						})
-						.addGfmSubCommand(permissionSub1A)
-						.addGfmSubCommand(permissionSub1D)
+						.addGfmSubCommand(bPermissionSub1A)
+						.addGfmSubCommand(bPermissionSub1D)
 						.build()
 		);
 		commands.add(
@@ -339,8 +339,8 @@ public class TestCommand {
 							commandSender.sendMessage("HeadD - Has permission");
 							return false;
 						})
-						.addGfmSubCommand(permissionSub1A)
-						.addGfmSubCommand(permissionSub1D)
+						.addGfmSubCommand(bPermissionSub1A)
+						.addGfmSubCommand(bPermissionSub1D)
 						.build()
 		);
 		commands.add(

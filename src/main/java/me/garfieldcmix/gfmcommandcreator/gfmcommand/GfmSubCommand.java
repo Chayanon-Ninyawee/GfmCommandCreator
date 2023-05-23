@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class GfmSubCommand extends GfmCommand {
-	@Setter	@Getter private boolean isPermissionBlockTabComplete;
+	@Getter private final boolean isPermissionBlockTabComplete;
 
 	protected GfmSubCommand(builder builder) {
 		super(builder);

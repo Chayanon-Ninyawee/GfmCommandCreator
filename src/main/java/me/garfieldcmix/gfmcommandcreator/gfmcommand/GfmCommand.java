@@ -10,16 +10,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class GfmCommand {
-	@Getter 		private final String name;
-	@Setter @Getter private String usage;
-	@Setter @Getter private boolean isTabComplete;
-	@Setter @Getter private boolean isTabCompletePlayer;
-	@Setter @Getter private List<List<String>> tabCompleteArgs;
-	@Setter @Getter	private Permission permission;
-	@Setter @Getter	private String noPermissionMessage;
-	@Setter @Getter	private GfmCommandHandler gfmCommandHandler;
-	@Setter @Getter private List<GfmSubCommand> gfmSubCommands;
-	@Setter @Getter private boolean isPermissionBlockGfmSubCommands;
+	@Getter private final String name;
+	@Getter private final String usage;
+	@Getter private final boolean isTabComplete;
+	@Getter private final boolean isTabCompletePlayer;
+	@Getter private final List<List<String>> tabCompleteArgs;
+	@Getter	private final Permission permission;
+	@Getter	private final String noPermissionMessage;
+	@Getter	private final GfmCommandHandler gfmCommandHandler;
+	@Getter private final List<GfmSubCommand> gfmSubCommands;
+	@Getter private final boolean isPermissionBlockGfmSubCommands;
 
 	protected GfmCommand(builder builder) {
 		this.name 								= builder.name;
@@ -150,7 +150,8 @@ public abstract class GfmCommand {
 		 * @param gfmSubCommands All GfmSubCommands that you want to set.
 		 */
 		public builder setGfmSubCommands(final List<GfmSubCommand> gfmSubCommands) {
-			this.gfmSubCommands = gfmSubCommands;
+			this.gfmSubCommands.clear();
+			this.gfmSubCommands.addAll(gfmSubCommands);
 			return this;
 		}
 
@@ -215,6 +216,11 @@ public abstract class GfmCommand {
 
 			return __build();
 		}
+	}
+
+	public void setGfmSubCommands(List<GfmSubCommand> subCommands) {
+		this.gfmSubCommands.clear();
+		this.gfmSubCommands.addAll(subCommands);
 	}
 
 	public void addGfmSubCommands(List<GfmSubCommand> subCommands) {
