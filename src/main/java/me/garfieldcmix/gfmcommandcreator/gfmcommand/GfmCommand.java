@@ -1,6 +1,7 @@
 package me.garfieldcmix.gfmcommandcreator.gfmcommand;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
@@ -9,16 +10,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class GfmCommand {
-	@Getter private final String name;
-	@Getter private final String usage;
-	@Getter private final boolean isTabComplete;
-	@Getter private final boolean isTabCompletePlayer;
-	@Getter private final List<List<String>> tabCompleteArgs;
-	@Getter	private final Permission permission;
-	@Getter	private final String noPermissionMessage;
-	@Getter	private final GfmCommandHandler gfmCommandHandler;
-	@Getter private final Set<GfmSubCommand> gfmSubCommands;
-	@Getter private final boolean isPermissionBlockGfmSubCommands;
+	@Getter 		private final String name;
+	@Setter @Getter private String usage;
+	@Setter @Getter private boolean isTabComplete;
+	@Setter @Getter private boolean isTabCompletePlayer;
+	@Setter @Getter private List<List<String>> tabCompleteArgs;
+	@Setter @Getter	private Permission permission;
+	@Setter @Getter	private String noPermissionMessage;
+	@Setter @Getter	private GfmCommandHandler gfmCommandHandler;
+	@Setter @Getter private List<GfmSubCommand> gfmSubCommands;
+	@Setter @Getter private boolean isPermissionBlockGfmSubCommands;
 
 	protected GfmCommand(builder builder) {
 		this.name 								= builder.name;
@@ -42,7 +43,7 @@ public abstract class GfmCommand {
 		Permission permission;
 		String noPermissionMessage 				= ChatColor.translateAlternateColorCodes('&', "&cYou don't have permission to use this command!");
 		GfmCommandHandler gfmCommandHandler;
-		Set<GfmSubCommand> gfmSubCommands		= new HashSet<>();
+		List<GfmSubCommand> gfmSubCommands		= new ArrayList<>();
 		boolean isPermissionBlockGfmSubCommands	= true;
 
 		/**
@@ -148,8 +149,17 @@ public abstract class GfmCommand {
 		 * Set all GfmSubCommands.
 		 * @param gfmSubCommands All GfmSubCommands that you want to set.
 		 */
-		public builder setGfmSubCommands(final Set<GfmSubCommand> gfmSubCommands) {
+		public builder setGfmSubCommands(final List<GfmSubCommand> gfmSubCommands) {
 			this.gfmSubCommands = gfmSubCommands;
+			return this;
+		}
+
+		/**
+		 * Add all GfmSubCommand.
+		 * @param subCommands GfmSubCommands that you want to add.
+		 */
+		public builder addGfmSubCommands(final List<GfmSubCommand> subCommands) {
+			this.gfmSubCommands.addAll(subCommands);
 			return this;
 		}
 
@@ -205,6 +215,18 @@ public abstract class GfmCommand {
 
 			return __build();
 		}
+	}
+
+	public void addGfmSubCommands(List<GfmSubCommand> subCommands) {
+		this.gfmSubCommands.addAll(subCommands);
+	}
+
+	public void addGfmSubCommand(GfmSubCommand subCommand) {
+		this.gfmSubCommands.add(subCommand);
+	}
+
+	public void clearGfmSubCommand() {
+		this.gfmSubCommands.clear();
 	}
 
 	public void executeCommand(CommandSender sender, String[] args) {

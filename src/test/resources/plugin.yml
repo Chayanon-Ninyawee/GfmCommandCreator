@@ -6,13 +6,11 @@ commands:
   gfmusage:
   gfmdefaultusage:
   gfmhandler:
-  gfmpermission:
+  gfmpermissionA:
+  gfmpermissionD:
   gfmdefaultpermission:
+  gfmblocksubcommandA:
+  gfmblocksubcommandD:
   gfmtabcomplete:
   gfmdefaulttabcomplete:
 
-permissions:
-  gfmtest:
-    commands:
-      gfmpermission:
-        default: op

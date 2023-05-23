@@ -1,9 +1,10 @@
 package me.garfieldcmix.gfmcommandcreator.gfmcommand;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public class GfmSubCommand extends GfmCommand {
-	@Getter private final boolean isPermissionBlockTabComplete;
+	@Setter	@Getter private boolean isPermissionBlockTabComplete;
 
 	protected GfmSubCommand(builder builder) {
 		super(builder);

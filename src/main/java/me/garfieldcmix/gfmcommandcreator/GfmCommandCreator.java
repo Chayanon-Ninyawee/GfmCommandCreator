@@ -10,8 +10,11 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GfmCommandCreator {
 	public static void register(JavaPlugin plugin, List<GfmHeadCommand> commands) {
@@ -36,7 +39,7 @@ public class GfmCommandCreator {
 
 		@Override
 		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-			if (!(args.length > 0) || this.gfmHeadCommand.getGfmSubCommands().isEmpty()) {
+			if (args.length == 0 || this.gfmHeadCommand.getGfmSubCommands().isEmpty()) {
 				if (this.gfmHeadCommand.getPermission() == null) {
 					this.gfmHeadCommand.executeCommand(sender, args);
 					return true;
@@ -73,7 +76,7 @@ public class GfmCommandCreator {
 
 					String[] subArgs = Arrays.copyOfRange(lastSubArgs, 1, lastSubArgs.length);
 
-					if (!(subArgs.length > 0) || gfmSubCommand.getGfmSubCommands().isEmpty()) {
+					if (subArgs.length == 0 || gfmSubCommand.getGfmSubCommands().isEmpty()) {
 						if (gfmSubCommand.getPermission() == null) {
 							gfmSubCommand.executeCommand(sender, subArgs);
 							return true;
@@ -119,12 +122,21 @@ public class GfmCommandCreator {
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 			if (args.length == 0) {
 				if (this.gfmHeadCommand.isTabComplete()) {
-					return new ArrayList<>(this.gfmHeadCommand.getTabCompleteArgs().get(0));
-				} else if (this.gfmHeadCommand.isTabCompletePlayer()) {
-					return null;
-				} else {
-					return Collections.emptyList();
+					if (!this.gfmHeadCommand.getTabCompleteArgs().isEmpty()) {
+						return new ArrayList<>(this.gfmHeadCommand.getTabCompleteArgs().get(0));
+					}
+					if (this.gfmHeadCommand.getGfmSubCommands().isEmpty()) {
+						return Collections.emptyList();
+					}
+					return this.gfmHeadCommand.getGfmSubCommands().stream()
+							.filter(gfmSubCommand -> !gfmSubCommand.isPermissionBlockTabComplete())
+							.map(GfmSubCommand::getName)
+							.collect(Collectors.toCollection(ArrayList::new));
 				}
+				if (this.gfmHeadCommand.isTabCompletePlayer()) {
+					return null;
+				}
+				return Collections.emptyList();
 			}
 
 			boolean isThereNextSubCommand = true;
@@ -142,7 +154,16 @@ public class GfmCommandCreator {
 
 					if (subArgs.length == 0) {
 						if (gfmSubCommand.isTabComplete()) {
-							return new ArrayList<>(gfmSubCommand.getTabCompleteArgs().get(0));
+							if (!gfmSubCommand.getTabCompleteArgs().isEmpty()) {
+								return new ArrayList<>(gfmSubCommand.getTabCompleteArgs().get(0));
+							}
+							if (gfmSubCommand.getGfmSubCommands().isEmpty()) {
+								return Collections.emptyList();
+							}
+							return gfmSubCommand.getGfmSubCommands().stream()
+									.filter(subCommand -> !subCommand.isPermissionBlockTabComplete())
+									.map(GfmSubCommand::getName)
+									.collect(Collectors.toCollection(ArrayList::new));
 						} else if (gfmSubCommand.isTabCompletePlayer()) {
 							return null;
 						} else {
