@@ -1,4 +1,4 @@
-# GfmCommandCreator
+# How to install
 To install GfmCommandCreator to your local maven repository.
 ```
 git clone https://github.com/Chayanon-Ninyawee/GfmCommandCreator.git
@@ -11,7 +11,7 @@ To add GfmCommandCreator as a dependency
 <dependency>
 	<groupId>me.garfieldcmix</groupId>
 	<artifactId>gfmcommandcreator</artifactId>
-	<version>0.0.0</version>
+	<version>0.0.1</version>
 </dependency>
 ```
 
@@ -30,4 +30,39 @@ To shade to your plugin
 		</execution>
 	</executions>
 </plugin>   
+```
+# Usage
+To register all GfmHeadCommand you had created
+```java
+GfmCommandCreator.register(yourJavaPlugin, listOfGfmHeadCommand);
+```
+You also need to add the command in the plugin.yml
+```yml
+commands:
+  cmd1:
+  cmd2:
+  cmd3:
+  .
+  .
+  .
+```
+
+To create GfmHeadCommand
+```java
+(GfmHeadCommand) new GfmHeadCommand.builder()
+	// Put any configuration specifically for GfmHeadCommand first
+	.setName("yourCommand") // Can't have the same name as other headCommand
+	.setGfmCommandHandler((sender, args) -> false) // You can use lambba expression here
+	// Other Configuration
+	.build()
+```
+
+To create GfmSubCommand
+```java
+(GfmSubCommand) new GfmSubCommand.builder()
+	// Put any configuration specifically for GfmSubCommand first
+	.setName("yourSubCommand") // Can't have the same name as other headCommand
+	.setGfmCommandHandler((sender, args) -> false) // You can use lambba expression here
+	// Other Configuration
+	.build()
 ```
