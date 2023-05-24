@@ -13,4 +13,6 @@ commands:
   gfmblocksubcommandD:
   gfmtabcomplete:
   gfmdefaulttabcomplete:
+  gfmplayertabcomplete:
+  gfmpermissiontabcomplete:
 

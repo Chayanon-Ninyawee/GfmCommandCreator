@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -99,7 +100,6 @@ public class TestGfmCommandCreator {
 		playerHasPermission.assertSaid("Sub3 Usage works!");
 		playerHasPermission.assertNoMoreSaid();
 	}
-
 
 	@Test
 	@DisplayName("Test All Command Default Usage")
@@ -391,7 +391,6 @@ public class TestGfmCommandCreator {
 		playerHasPermission.assertNoMoreSaid();
 	}
 
-
 	@Test
 	@DisplayName("Test All Command Default Permission Message")
 	public void testCommandDefaultPermission() {
@@ -537,7 +536,9 @@ public class TestGfmCommandCreator {
 		playerHasPermission.assertNoMoreSaid();
 	}
 
+
 	@Test
+	@DisplayName("Test TabComplete")
 	public void testTabComplete() {
 		Command command = plugin.getCommand("gfmtabcomplete");
 		assert command != null;
@@ -545,18 +546,82 @@ public class TestGfmCommandCreator {
 		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
 		List<String> testedSubCommands = new ArrayList<>();
 
-		assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerNoPermission, command.getName(), new String[]{}));
-		assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerHasPermission, command.getName(), new String[]{}));
+		assertEquals(Arrays.asList("headtab1", "headtab2", "headtab3"), command.tabComplete(playerNoPermission, command.getName(), new String[]{}));
+		assertEquals(Arrays.asList("headtab1", "headtab2", "headtab3"), command.tabComplete(playerHasPermission, command.getName(), new String[]{}));
 
 		for(String testSubCommand : testSubCommands) {
 			testedSubCommands.add(testSubCommand);
 
-			assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0])));
-			assertEquals(Arrays.asList("tab1", "tab2", "tab3"), command.tabComplete(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+			assertEquals(Arrays.asList(testSubCommand+"tab1", testSubCommand+"tab2", testSubCommand+"tab3"), command.tabComplete(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+			assertEquals(Arrays.asList(testSubCommand+"tab1", testSubCommand+"tab2", testSubCommand+"tab3"), command.tabComplete(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0])));
 		}
 	}
 
-	// TODO: Test TabComplete
+	@Test
+	@DisplayName("Test Default TabComplete")
+	public void testDefaultTabComplete() {
+		Command command = plugin.getCommand("gfmdefaulttabcomplete");
+		assert command != null;
 
+		List<String> testSubCommands = Arrays.asList("sub1h", "sub21", "sub32");
+		List<String> testedSubCommands = new ArrayList<>();
 
+		assertEquals(Arrays.asList("sub1h", "sub2h", "sub3h"), command.tabComplete(playerNoPermission, command.getName(), new String[]{}));
+		assertEquals(Arrays.asList("sub1h", "sub2h", "sub3h"), command.tabComplete(playerHasPermission, command.getName(), new String[]{}));
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			assertEquals(Arrays.asList("sub1"+testSubCommand.charAt(3), "sub2"+testSubCommand.charAt(3), "sub3"+testSubCommand.charAt(3)), command.tabComplete(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+			assertEquals(Arrays.asList("sub1"+testSubCommand.charAt(3), "sub2"+testSubCommand.charAt(3), "sub3"+testSubCommand.charAt(3)), command.tabComplete(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+		}
+	}
+
+	@Test
+	@DisplayName("Test Player TabComplete")
+	public void testPlayerTabComplete() {
+		Command command = plugin.getCommand("gfmplayertabcomplete");
+		assert command != null;
+
+		List<String> testSubCommands = Arrays.asList("sub1", "sub2", "sub3");
+		List<String> testedSubCommands = new ArrayList<>();
+
+		assertEquals(server.getOnlinePlayers().stream().map(PlayerMock::getName).collect(Collectors.toList()), command.tabComplete(playerNoPermission, command.getName(), new String[]{}));
+		assertEquals(server.getOnlinePlayers().stream().map(PlayerMock::getName).collect(Collectors.toList()), command.tabComplete(playerHasPermission, command.getName(), new String[]{}));
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			assertEquals(server.getOnlinePlayers().stream().map(PlayerMock::getName).collect(Collectors.toList()), command.tabComplete(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+			assertEquals(server.getOnlinePlayers().stream().map(PlayerMock::getName).collect(Collectors.toList()), command.tabComplete(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+		}
+	}
+
+	@Test
+	@DisplayName("Test Permission TabComplete")
+	public void testPermissionTabComplete() {
+		// Set playerHasPermission permission
+		HashMap<UUID, PermissionAttachment> perms = new HashMap<UUID, PermissionAttachment>();
+		PermissionAttachment attachment = playerHasPermission.addAttachment(plugin);
+		perms.put(playerHasPermission.getUniqueId(), attachment);
+		PermissionAttachment pperms = perms.get(playerHasPermission.getUniqueId());
+		pperms.setPermission("testplugin.commands.sub1", true);
+		pperms.setPermission("testplugin.commands.sub3", true);
+
+		Command command = plugin.getCommand("gfmpermissiontabcomplete");
+		assert command != null;
+
+		List<String> testSubCommands = Arrays.asList("sub1h", "sub21", "sub32");
+		List<String> testedSubCommands = new ArrayList<>();
+
+		assertEquals(Collections.emptyList(), command.tabComplete(playerNoPermission, command.getName(), new String[]{}));
+		assertEquals(Arrays.asList("sub1h", "sub3h"), command.tabComplete(playerHasPermission, command.getName(), new String[]{}));
+
+		for(String testSubCommand : testSubCommands) {
+			testedSubCommands.add(testSubCommand);
+
+			assertEquals(Collections.emptyList(), command.tabComplete(playerNoPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+			assertEquals(Arrays.asList("sub1"+testSubCommand.charAt(3), "sub3"+testSubCommand.charAt(3)), command.tabComplete(playerHasPermission, command.getName(), testedSubCommands.toArray(new String[0])));
+		}
+	}
 }

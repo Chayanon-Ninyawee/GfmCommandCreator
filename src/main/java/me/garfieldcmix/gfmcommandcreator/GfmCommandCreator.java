@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -125,16 +126,18 @@ public class GfmCommandCreator {
 					if (!this.gfmHeadCommand.getTabCompleteArgs().isEmpty()) {
 						return new ArrayList<>(this.gfmHeadCommand.getTabCompleteArgs().get(0));
 					}
+					if (this.gfmHeadCommand.isTabCompletePlayer()) {
+						return sender.getServer().getOnlinePlayers().stream()
+								.map(Player::getName)
+								.collect(Collectors.toCollection(ArrayList::new));
+					}
 					if (this.gfmHeadCommand.getGfmSubCommands().isEmpty()) {
 						return Collections.emptyList();
 					}
 					return this.gfmHeadCommand.getGfmSubCommands().stream()
-							.filter(gfmSubCommand -> !gfmSubCommand.isPermissionBlockTabComplete())
+							.filter(gfmSubCommand -> !gfmSubCommand.isPermissionBlockTabComplete() || sender.hasPermission(gfmSubCommand.getPermission()))
 							.map(GfmSubCommand::getName)
 							.collect(Collectors.toCollection(ArrayList::new));
-				}
-				if (this.gfmHeadCommand.isTabCompletePlayer()) {
-					return null;
 				}
 				return Collections.emptyList();
 			}
@@ -157,18 +160,20 @@ public class GfmCommandCreator {
 							if (!gfmSubCommand.getTabCompleteArgs().isEmpty()) {
 								return new ArrayList<>(gfmSubCommand.getTabCompleteArgs().get(0));
 							}
+							if (gfmSubCommand.isTabCompletePlayer()) {
+								return sender.getServer().getOnlinePlayers().stream()
+										.map(Player::getName)
+										.collect(Collectors.toCollection(ArrayList::new));
+							}
 							if (gfmSubCommand.getGfmSubCommands().isEmpty()) {
 								return Collections.emptyList();
 							}
 							return gfmSubCommand.getGfmSubCommands().stream()
-									.filter(subCommand -> !subCommand.isPermissionBlockTabComplete())
+									.filter(subCommand -> !subCommand.isPermissionBlockTabComplete() || sender.hasPermission(subCommand.getPermission()))
 									.map(GfmSubCommand::getName)
 									.collect(Collectors.toCollection(ArrayList::new));
-						} else if (gfmSubCommand.isTabCompletePlayer()) {
-							return null;
-						} else {
-							return Collections.emptyList();
 						}
+						return Collections.emptyList();
 					}
 
 					isThereNextSubCommand = !gfmSubCommand.getGfmSubCommands().isEmpty();
