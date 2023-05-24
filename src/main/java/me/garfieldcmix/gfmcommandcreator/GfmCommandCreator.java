@@ -1,21 +1,25 @@
 package me.garfieldcmix.gfmcommandcreator;
 
 import me.garfieldcmix.gfmcommandcreator.gfmcommand.GfmCommand;
+import me.garfieldcmix.gfmcommandcreator.gfmcommand.GfmHeadCommand;
 import me.garfieldcmix.gfmcommandcreator.gfmcommand.GfmSubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GfmCommandCreator {
-	public static void register(JavaPlugin plugin, List<GfmCommand> commands) {
-		for (GfmCommand command : commands) {
-
-
+	public static void register(JavaPlugin plugin, List<GfmHeadCommand> commands) {
+		for (GfmHeadCommand command : commands) {
 			CmdExecutor cmdExecutor = new CmdExecutor(command);
 			CmdTabCompleter cmdTabCompleter = new CmdTabCompleter(command);
 
@@ -28,125 +32,157 @@ public class GfmCommandCreator {
 	}
 
 	private static class CmdExecutor implements Listener, CommandExecutor {
-		private final GfmCommand gfmCommand;
+		private final GfmHeadCommand gfmHeadCommand;
 
-		private CmdExecutor(GfmCommand gfmCommand) {
-			this.gfmCommand = gfmCommand;
+		private CmdExecutor(GfmHeadCommand gfmHeadCommand) {
+			this.gfmHeadCommand = gfmHeadCommand;
 		}
 
 		@Override
 		public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-			if (!(args.length > 0)) {
-				if (this.gfmCommand.isPermissionNull()) {
-					if (!this.gfmCommand.getGfmCommandHandler().execute(sender, args)) {
-						sender.sendMessage(this.gfmCommand.getUsage());
-					}
+			if (args.length == 0 || this.gfmHeadCommand.getGfmSubCommands().isEmpty()) {
+				if (this.gfmHeadCommand.getPermission() == null) {
+					this.gfmHeadCommand.executeCommand(sender, args);
 					return true;
 				}
 
-				if (sender.hasPermission(this.gfmCommand.getPermission())) {
-					if (!this.gfmCommand.getGfmCommandHandler().execute(sender, args)) {
-						sender.sendMessage(this.gfmCommand.getUsage());
-					}
+				if (sender.hasPermission(this.gfmHeadCommand.getPermission())) {
+					this.gfmHeadCommand.executeCommand(sender, args);
 					return true;
 				}
 
-				sender.sendMessage(this.gfmCommand.getNoPermissionMessage());
+				sender.sendMessage(this.gfmHeadCommand.getNoPermissionMessage());
 				return true;
 			}
 
-			if (!this.gfmCommand.isPermissionNull() && this.gfmCommand.isPermissionBlockGfmSubCommands()) {
-				if (!sender.hasPermission(this.gfmCommand.getPermission())) {
-					sender.sendMessage(this.gfmCommand.getNoPermissionMessage());
-					return true;
+			if (this.gfmHeadCommand.getPermission() != null) {
+				if (this.gfmHeadCommand.isPermissionBlockGfmSubCommands()) {
+					if (!sender.hasPermission(this.gfmHeadCommand.getPermission())) {
+						sender.sendMessage(this.gfmHeadCommand.getNoPermissionMessage());
+						return true;
+					}
 				}
 			}
 
-			for (GfmSubCommand gfmSubCommand : this.gfmCommand.getGfmSubCommands()) {
-				if (args[0].equalsIgnoreCase(gfmSubCommand.getName())) {
-					String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
-					if (gfmSubCommand.isPermissionNull()) {
-						if (!gfmSubCommand.getGfmCommandHandler().execute(sender, subArgs)) {
-							sender.sendMessage(gfmSubCommand.getUsage());
+			boolean isThereNextSubCommand = true;
+			boolean isThereAnyCorrectSubCommand = true;
+			GfmCommand lastSubCommand = this.gfmHeadCommand;
+			String[] lastSubArgs = args;
+
+			while(isThereNextSubCommand && isThereAnyCorrectSubCommand) {
+				isThereAnyCorrectSubCommand = false;
+
+				for (GfmSubCommand gfmSubCommand : lastSubCommand.getGfmSubCommands()) {
+					if (!lastSubArgs[0].equalsIgnoreCase(gfmSubCommand.getName())) continue;
+
+					String[] subArgs = Arrays.copyOfRange(lastSubArgs, 1, lastSubArgs.length);
+
+					if (subArgs.length == 0 || gfmSubCommand.getGfmSubCommands().isEmpty()) {
+						if (gfmSubCommand.getPermission() == null) {
+							gfmSubCommand.executeCommand(sender, subArgs);
+							return true;
 						}
+
+						if (sender.hasPermission(gfmSubCommand.getPermission())) {
+							gfmSubCommand.executeCommand(sender, subArgs);
+							return true;
+						}
+
+						sender.sendMessage(gfmSubCommand.getNoPermissionMessage());
 						return true;
 					}
 
-					if (sender.hasPermission(gfmSubCommand.getPermission())) {
-						if (!gfmSubCommand.getGfmCommandHandler().execute(sender, subArgs)) {
-							sender.sendMessage(gfmSubCommand.getUsage());
+					if (gfmSubCommand.getPermission() != null) {
+						if (gfmSubCommand.isPermissionBlockGfmSubCommands()) {
+							if (!sender.hasPermission(gfmSubCommand.getPermission())) {
+								sender.sendMessage(gfmSubCommand.getNoPermissionMessage());
+								return true;
+							}
 						}
-						return true;
 					}
 
-					sender.sendMessage(gfmSubCommand.getNoPermissionMessage());
-					return true;
+					isThereNextSubCommand = !gfmSubCommand.getGfmSubCommands().isEmpty();
+					isThereAnyCorrectSubCommand = true;
+					lastSubCommand = gfmSubCommand;
+					lastSubArgs = subArgs;
 				}
+
 			}
-			sender.sendMessage(this.gfmCommand.getUsage());
 			return true;
 		}
 	}
 
 	private static class CmdTabCompleter implements TabCompleter {
-		private final GfmCommand gfmCommand;
+		private final GfmHeadCommand gfmHeadCommand;
 
-		private CmdTabCompleter(GfmCommand gfmCommand) {
-			this.gfmCommand = gfmCommand;
+		private CmdTabCompleter(GfmHeadCommand gfmHeadCommand) {
+			this.gfmHeadCommand = gfmHeadCommand;
 		}
 
 		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-			if (this.gfmCommand.isTabCompleteEmpty()) {
-				if (args.length != 1) {
-					return null;
+			if (args.length == 0) {
+				if (this.gfmHeadCommand.isTabComplete()) {
+					if (!this.gfmHeadCommand.getTabCompleteArgs().isEmpty()) {
+						return new ArrayList<>(this.gfmHeadCommand.getTabCompleteArgs().get(0));
+					}
+					if (this.gfmHeadCommand.isTabCompletePlayer()) {
+						return sender.getServer().getOnlinePlayers().stream()
+								.map(Player::getName)
+								.collect(Collectors.toCollection(ArrayList::new));
+					}
+					if (this.gfmHeadCommand.getGfmSubCommands().isEmpty()) {
+						return Collections.emptyList();
+					}
+					return this.gfmHeadCommand.getGfmSubCommands().stream()
+							.filter(gfmSubCommand -> !gfmSubCommand.isPermissionBlockTabComplete() || sender.hasPermission(gfmSubCommand.getPermission()))
+							.map(GfmSubCommand::getName)
+							.collect(Collectors.toCollection(ArrayList::new));
 				}
+				return Collections.emptyList();
+			}
 
-				List<String> gfmSubCommandVisibleNames = new ArrayList<>();
-				for (GfmSubCommand gfmSubCommand : this.gfmCommand.getGfmSubCommands()) {
-					if (gfmSubCommand.isTabComplete()) {
-						if (!gfmSubCommand.isPermissionNull() && gfmSubCommand.isTabCompleteToPermission()) {
-							if (!sender.hasPermission(gfmSubCommand.getPermission())) {
-								continue;
+			boolean isThereNextSubCommand = true;
+			boolean isThereAnyCorrectSubCommand = true;
+			GfmCommand lastSubCommand = this.gfmHeadCommand;
+			String[] lastSubArgs = args;
+
+			while(isThereNextSubCommand && isThereAnyCorrectSubCommand) {
+				isThereAnyCorrectSubCommand = false;
+
+				for (GfmSubCommand gfmSubCommand : lastSubCommand.getGfmSubCommands()) {
+					if (!lastSubArgs[0].equalsIgnoreCase(gfmSubCommand.getName())) continue;
+
+					String[] subArgs = Arrays.copyOfRange(lastSubArgs, 1, lastSubArgs.length);
+
+					if (subArgs.length == 0) {
+						if (gfmSubCommand.isTabComplete()) {
+							if (!gfmSubCommand.getTabCompleteArgs().isEmpty()) {
+								return new ArrayList<>(gfmSubCommand.getTabCompleteArgs().get(0));
 							}
+							if (gfmSubCommand.isTabCompletePlayer()) {
+								return sender.getServer().getOnlinePlayers().stream()
+										.map(Player::getName)
+										.collect(Collectors.toCollection(ArrayList::new));
+							}
+							if (gfmSubCommand.getGfmSubCommands().isEmpty()) {
+								return Collections.emptyList();
+							}
+							return gfmSubCommand.getGfmSubCommands().stream()
+									.filter(subCommand -> !subCommand.isPermissionBlockTabComplete() || sender.hasPermission(subCommand.getPermission()))
+									.map(GfmSubCommand::getName)
+									.collect(Collectors.toCollection(ArrayList::new));
 						}
-						gfmSubCommandVisibleNames.add(gfmSubCommand.getName());
+						return Collections.emptyList();
 					}
-				}
 
-				return createReturnList(gfmSubCommandVisibleNames, args[0]);
-			}
-
-			for(int i = 0; i < this.gfmCommand.getTabCompleteArgs().size(); i++) {
-				if (args.length == i+1) {
-					return createReturnList(this.gfmCommand.getTabCompleteArgs().get(i), args[i]);
+					isThereNextSubCommand = !gfmSubCommand.getGfmSubCommands().isEmpty();
+					isThereAnyCorrectSubCommand = true;
+					lastSubCommand = gfmSubCommand;
+					lastSubArgs = subArgs;
 				}
 			}
-
-			return null;
-		}
-
-		private List<String> createReturnList(List<String> list, String string) {
-			if (string.length() == 0) {
-				return list;
-			}
-
-			String input = string.toLowerCase(Locale.ROOT);
-			List<String> returnList = new LinkedList<>();
-
-			for (String item : list) {
-				if (item.toLowerCase(Locale.ROOT).contains(input)) {
-					returnList.add(item);
-
-					if (returnList.size() >= 40) {
-						break;
-					}
-				} else if (item.equalsIgnoreCase(input)) {
-					return Collections.emptyList();
-				}
-			}
-
-			return returnList;
+			return Collections.emptyList();
 		}
 	}
 }
