@@ -121,7 +121,9 @@ public class GfmCommandCreator {
 
 		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-			if (args.length == 0) {
+			if (args.length < 1) return Collections.emptyList();
+
+			if (args.length == 1) {
 				if (this.gfmHeadCommand.isTabComplete()) {
 					if (!this.gfmHeadCommand.getTabCompleteArgs().isEmpty()) {
 						return new ArrayList<>(this.gfmHeadCommand.getTabCompleteArgs().get(0));
@@ -155,7 +157,9 @@ public class GfmCommandCreator {
 
 					String[] subArgs = Arrays.copyOfRange(lastSubArgs, 1, lastSubArgs.length);
 
-					if (subArgs.length == 0) {
+					if (subArgs.length < 1) return Collections.emptyList();
+
+					if (subArgs.length == 1) {
 						if (gfmSubCommand.isTabComplete()) {
 							if (!gfmSubCommand.getTabCompleteArgs().isEmpty()) {
 								return new ArrayList<>(gfmSubCommand.getTabCompleteArgs().get(0));
