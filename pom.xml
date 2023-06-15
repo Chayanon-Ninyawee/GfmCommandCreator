@@ -6,7 +6,7 @@
 
 	<groupId>me.garfieldcmix</groupId>
 	<artifactId>gfmcommandcreator</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<packaging>jar</packaging>
 
 	<name>GfmCommandCreator</name>
